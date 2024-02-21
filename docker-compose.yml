@@ -1,0 +1,63 @@
+version: "3.3"
+services:
+  workspace:
+    build:
+      context: ./docker/alpine
+      args:
+        - XDEBUG_ENABLE=${XDEBUG_ENABLE:-0}
+    ports:
+      - "9000:9000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${DATA_SRC:-../src}:/var/www/html
+      - ./docker/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:cached
+      - ./docker/php/php-extra.ini:/usr/local/etc/php/conf.d/docker-php-ext-custom-php.ini:cached
+      - ./var/log/xdebug:/tmp/xdebug:delegated
+    environment:
+      - PHP_MEMORY_LIMIT=-1
+      - COMPOSER_MEMORY_LIMIT=-1
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - workspace
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/templates:/etc/nginx/templates:cached
+      - ./var/log/nginx:/var/log/nginx:delegated
+      - ${DATA_SRC:-../src}:/var/www/html:cached
+
+  mariadb:
+    image: mariadb:10.6.1
+    command: --max_allowed_packet=32505856
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS:-root}
+      MARIADB_USER: ${DB_USER:-default}
+      MARIADB_PASSWORD: ${DB_PASS:-secret}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - ${DB_DATA:-../datadir}:/var/lib/mysql:delegated
+      - ./docker/mariadb:/docker-entrypoint-initdb.d:cached
+
+  adminer:
+    image: adminer:4.8.0
+    depends_on:
+      - mariadb
+    environment:
+      ADMINER_DEFAULT_SERVER: mariadb
+    ports:
+      - "8080:8080"
+
+  wpcli:
+    image: wordpress:cli-php7.4
+    depends_on:
+      - mariadb
+      - workspace
+    user: "1000"
+    entrypoint: wp
+    command: "--info"
+    volumes:
+      - ${DATA_SRC:-../src}:/var/www/html:delegated

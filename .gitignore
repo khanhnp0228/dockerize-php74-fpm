@@ -1,0 +1,13 @@
+datadir
+.env
+createdb.sql
+
+docker/nginx/templates/*.template
+
+var/log/nginx/*
+!var/log/nginx/.gitkeep
+
+docker/xdebug/*.ini
+
+var/log/xdebug/*
+!var/log/xdebug/.gitkeep
