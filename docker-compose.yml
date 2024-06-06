@@ -18,6 +18,17 @@ services:
       - PHP_MEMORY_LIMIT=-1
       - COMPOSER_MEMORY_LIMIT=-1
 
+  node:
+    image: node:20.9.0-alpine
+    user: node
+    volumes:
+      - ../src:/var/www
+      # - ./docker/node/entry:/entry
+    working_dir: /var/www
+    # command: /entry/initial.sh
+    # tty: true
+    # stdin_open: true
+
   nginx:
     image: nginx:alpine
     depends_on:
