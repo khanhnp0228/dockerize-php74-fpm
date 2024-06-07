@@ -5,6 +5,7 @@ services:
       context: ./docker/alpine
       args:
         - XDEBUG_ENABLE=${XDEBUG_ENABLE:-0}
+        - ERROR_DISPLAY=${ERROR_DISPLAY:-0}
     ports:
       - "9000:9000"
     extra_hosts:
@@ -13,7 +14,7 @@ services:
       - ${DATA_SRC:-../src}:/var/www/html
       - ./docker/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini:cached
       - ./docker/php/php-extra.ini:/usr/local/etc/php/conf.d/docker-php-ext-custom-php.ini:cached
-      - ./var/log/xdebug:/tmp/xdebug:delegated
+      - ${LOG_DIR:-./var/log}/xdebug:/tmp/xdebug:delegated
     environment:
       - PHP_MEMORY_LIMIT=-1
       - COMPOSER_MEMORY_LIMIT=-1
@@ -37,7 +38,7 @@ services:
       - "80:80"
     volumes:
       - ./docker/nginx/templates:/etc/nginx/templates:cached
-      - ./var/log/nginx:/var/log/nginx:delegated
+      - ${LOG_DIR:-./var/log}/nginx:/var/log/nginx:delegated
       - ${DATA_SRC:-../src}:/var/www/html:cached
 
   mariadb:
@@ -71,4 +72,4 @@ services:
     entrypoint: wp
     command: "--info"
     volumes:
-      - ${DATA_SRC:-../src}:/var/www/html:delegated
+      - ${DATA_SRC:-../src}:/var/www/html
