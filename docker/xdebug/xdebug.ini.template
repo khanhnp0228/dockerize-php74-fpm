@@ -19,11 +19,3 @@ xdebug.idekey=docker
 ; xdebug.remote_handler = "dbgp"
 ; xdebug.remote_mode = req
 ; xdebug.remote_connect_back = 1
-
-
-
-
-# Debug Mode
-error_reporting=E_ALL
-display_startup_errors=On
-display_errors=On
